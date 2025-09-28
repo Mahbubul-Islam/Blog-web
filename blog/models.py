@@ -1,12 +1,14 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from ckeditor_uploader.fields import RichTextUploadingField
+from django_ckeditor_5.fields import CKEditor5Field
 from django.contrib.auth.models import User
 
 # Create your models here.
 
 class Category(models.Model):
     name = models.CharField(max_length=100)
+    class Meta:
+        verbose_name_plural = "Categories" 
     
     def __str__(self):
         return self.name
@@ -20,15 +22,16 @@ class Tag(models.Model):
 class Post(models.Model):
     title = models.CharField(_("Blog Title"),max_length=100)
     category = models.ForeignKey(Category, on_delete=models.CASCADE) # One category can have many post
-    content = RichTextUploadingField()
+    content = CKEditor5Field()
+    tag = models.ManyToManyField(Tag) # One post can hbe many tags, One Tag can be associated with many Posts
     author = models.ForeignKey(User,on_delete=models.CASCADE) # One Author can have many Posts
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     view_count = models.PositiveBigIntegerField(default=0)
-    liked_user = models.ManyToManyField(User, related_name='liked_post') # One Post can be liked by many Users, One User can like many Posts
+    liked_user = models.ManyToManyField(User, blank=True, related_name='liked_post') # One Post can be liked by many Users, One User can like many Posts
     
     def __str__(self):
-        return self.name
+        return self.title
     
     
 class Comment(models.Model):
